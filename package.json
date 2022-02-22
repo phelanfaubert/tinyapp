@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/phelanfaubert/tinyapp#readme",
   "dependencies": {
+    "body-parse": "^0.1.0",
     "ejs": "^3.1.6",
     "express": "^4.17.3"
   }
