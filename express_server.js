@@ -5,6 +5,20 @@ const bodyParser = require("body-parser");
 
 const PORT = 8080;
 
+const users = { 
+  "user1": {
+    id: "plinketscrooge", 
+    email: "plinket@scrooge.com", 
+    password: "1111"
+  },
+ "user2": {
+    id: "plunketadmiral", 
+    email: "plunket@admiral.com", 
+    password: "2222"
+  }
+}
+
+
 app.use(bodyParser.urlencoded({extended: true})); 
 app.use(cookieParser())
 
@@ -59,8 +73,6 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL
   res.redirect(`/urls/${shortURL}`);
-  //console.log(req.body);  // Log the POST request body to the console
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -82,19 +94,29 @@ app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie("username", username);
   res.redirect("/urls");
-})
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
-})
+});
 
-// const templateVars = {
-//   username: req.cookies["username"],
-//   // ... any other vars
-// };
-// res.render("urls_index", templateVars);
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies.username
+  }
+  res.render("urls_register");
+});
 
+app.post("/register", (req, res) => {
+  let newUserID = generateRandomString();
+  let password = req.body.password;
+  let email = req.body.email;
+
+  res.cookie = ("username", users[newUserID]);
+  console.log(users)
+  res.redirect("/urls");
+});
 
 
 function generateRandomString() {
