@@ -73,16 +73,16 @@ app.post("/urls/:id", (req, res) => {
   console.log(longURL)
 });
 
-app.post("/login", (req, res) => {
-  const username = req.body.username;
-  console.log("Hello", username)
-  res.cookie("/login", "username");
-  res.redirect("/urls");
-})
+// app.post("/login", (req, res) => {
+//   const username = req.body.username;
+//   console.log("Hello", username)
+//   res.cookie("/login", "username");
+//   res.redirect("/urls");
+// })
 
-app.get("/login", (req, res) => {
-  res.render("login")
-})
+// app.get("/login", cookieParser(), (req, res) => {
+//   res.render("login")
+// })
 
 function generateRandomString() {
 
