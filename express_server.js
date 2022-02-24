@@ -93,9 +93,8 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   checkUser(users, req.body, res, req)
-  // res.cookie("user_id", username);
-  // res.redirect("/urls");
-
+  createUser(users, req.body, res)
+  // checkEmail(users,req.body, res)
 });
 
 app.post("/logout", (req, res) => {
@@ -145,9 +144,10 @@ const createUser = function(userDatabase, userInfo, res) {
     console.log(userInfo)
     res.status(400).send('Missing email or password');
   }
-
+console.log("UDBEMAIL", userDatabase[email])
   if (userDatabase[email]) {
-    res.status(400).send('Bad Request');
+    
+    res.status(400).send('Invalid');
   }
 
   const newUser = { email, password };
@@ -156,17 +156,33 @@ const createUser = function(userDatabase, userInfo, res) {
 
 const checkUser = function(userDatabase, userInfo, res, req) {
   const { email, password } = userInfo;
-console.log('Look for email', email)
-console.log('Look for pass', password)
+// console.log('Look for email', email)
+// console.log('Look for pass', password)
   if (!email || !password) {
-    console.log(userInfo)
+    // console.log(userInfo)
     res.status(400).send('Missing email or password');
   }
 for (const key in userDatabase) {
-  console.log(userDatabase[key])
+  // console.log(userDatabase[key])
   if (userDatabase[key].email === email && userDatabase[key].password === password) {
     res.cookie("user_id", userDatabase[key].id)
     res.redirect("/urls");
   }
 }
 };
+
+// const checkEmail = function(userDatabase, userInfo, res) {
+//   const { email, password } = userInfo;
+//   if(!email) {
+//     res.status(403).send('Email not found')
+//   }
+// for (const key in userDatabase) {
+//   if(userDatabase[key].email === email && userDatabase[key].password !== password) {
+//     res.status(403).send('Email and password do not match')
+//   } else {
+//     res.cookie("user_id", userDatabase[key].id)
+//     res.redirect("/urls");
+//   }
+// }
+// };
+
