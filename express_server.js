@@ -92,12 +92,12 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   const username = req.body.username;
-  res.cookie("username", username);
+  res.cookie("user_id", username);
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -115,6 +115,7 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   }
+  createUser(users, req.body, res)
   users[newID] = user;
   res.cookie("user_id", newID);
   console.log(users)
@@ -126,4 +127,22 @@ function generateRandomString() {
 
   const result = Math.random().toString(20).substring(2, 8);
   return result;
+};
+
+const createUser = function(userDatabase, userInfo, res) {
+  const { email, password } = userInfo;
+
+  if (!email || !password) {
+    console.log(userInfo)
+    res.status(400).send('Missing email or password');
+  }
+
+  if (userDatabase[email]) {
+    res.status(400).send('Bad Request');
+  }
+
+  const newUser = { email, password };
+  userDatabase[email] = newUser;
+
+  // return { error: null, data: newUser };
 };
