@@ -6,12 +6,12 @@ const bodyParser = require("body-parser");
 const PORT = 8080;
 
 const users = { 
-  "user1": {
+  "plinketscrooge": {
     id: "plinketscrooge", 
     email: "plinket@scrooge.com", 
     password: "1111"
   },
- "user2": {
+ "plunketadmiral": {
     id: "plunketadmiral", 
     email: "plunket@admiral.com", 
     password: "2222"
@@ -46,6 +46,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  console.log('REQ cookies', req.cookies)
   const templateVars = { 
     urls: urlDatabase,
     user: users[req.cookies.user_id]
@@ -91,9 +92,10 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("user_id", username);
-  res.redirect("/urls");
+  checkUser(users, req.body, res, req)
+  // res.cookie("user_id", username);
+  // res.redirect("/urls");
+
 });
 
 app.post("/logout", (req, res) => {
@@ -122,6 +124,13 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies.user_id]
+  }
+  res.render("urls_login", templateVars)
+});
+
 
 function generateRandomString() {
 
@@ -143,6 +152,21 @@ const createUser = function(userDatabase, userInfo, res) {
 
   const newUser = { email, password };
   userDatabase[email] = newUser;
+};
 
-  // return { error: null, data: newUser };
+const checkUser = function(userDatabase, userInfo, res, req) {
+  const { email, password } = userInfo;
+console.log('Look for email', email)
+console.log('Look for pass', password)
+  if (!email || !password) {
+    console.log(userInfo)
+    res.status(400).send('Missing email or password');
+  }
+for (const key in userDatabase) {
+  console.log(userDatabase[key])
+  if (userDatabase[key].email === email && userDatabase[key].password === password) {
+    res.cookie("user_id", userDatabase[key].id)
+    res.redirect("/urls");
+  }
+}
 };
