@@ -25,8 +25,19 @@ app.use(cookieParser())
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
+"b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const urlDatabase = {
+'b2xVn2': {
+      longURL: "http://www.lighthouselabs.ca",
+      userID: "plinketscrooge"
+  },
+'9sm5xK': {
+      longURL: "https://www.google.com",
+      userID: "plunketadmirals"
+  }
 };
 
 app.get("/", (req, res) => {
@@ -64,21 +75,26 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies.user_id;
+  if(userId && users[userId]) {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL
+  urlDatabase[shortURL].longURL = req.body.longURL
   res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(400).send("Acces denied")
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  delete urlDatabase[shortURL].longURL;
   res.redirect("/urls");
 });
 
@@ -86,7 +102,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const shortURL = req.params.shortURL;       
   const longURL = req.body.longURL;       
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect("/urls");
   console.log(longURL)
 });
