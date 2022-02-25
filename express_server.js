@@ -23,6 +23,15 @@ const users = {
   }
 }
 
+const findUserByEmail = function(email) {
+  for (let id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
+  return null;
+}
+
 const urlDatabase = {
 'b2xVn2': {
       longURL: "http://www.lighthouselabs.ca",
@@ -121,12 +130,17 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // const password = req.params.password
-  // const hashedPassword = bcrypt.hashSync(password, 10);
-  // bcrypt.compareSync(password, hashedPassword);
-  checkUser(users, req.body, res, req)
-  createUser(users, req.body, res)
-
+  const password = req.body.password;
+  const email = req.body.email;
+  if (!email || !password) {
+    res.status(400).send('Missing email or password');
+  }
+  const user = findUserByEmail(email);
+  if (!bcrypt.compareSync(password, user.password)){
+    res.status(400).send('Passwords do not match');
+  }
+  res.cookie("user_id", user.id)
+  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
@@ -148,15 +162,22 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const password = req.params.password; 
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    res.status(400).send('User does not exist');
+  }
+  if (findUserByEmail(email)) {
+    res.status(400).send('Invalid');
+  }
+
   const hashedPassword = bcrypt.hashSync(password, 10);
   const newID = generateRandomString();
   const user = {
     id: newID,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword
   }
-  createUser(users, req.body, res)
   users[newID] = user;
   res.cookie("user_id", newID);
   res.redirect("/urls");
@@ -176,36 +197,32 @@ function generateRandomString() {
   return result;
 };
 
-const createUser = function(users, userInfo, res) {
-  const { email, password } = userInfo;
+// const createUser = function(users, userInfo, res) {
+//   const { email, password } = userInfo;
 
-  if (!email || !password) {
-    console.log(userInfo)
-    res.status(400).send('Missing email or password');
-  }
-console.log("UDBEMAIL", users[email])
-  if (users[email]) {
+//   if (!email || !password) {
+//     console.log(userInfo)
+//     res.status(400).send('Missing email or password');
+//   }
+// console.log("UDBEMAIL", users[email])
+//   if (users[email]) {
     
-    res.status(400).send('Invalid');
-  }
+//     res.status(400).send('Invalid');
+//   }
 
-  const newUser = { email, password };
-  users[email] = newUser;
-};
+//   const newUser = { email, password };
+//   return newUser;
+// };
 
-const checkUser = function(users, userInfo, res, req) {
-  const { email, password } = userInfo;
-// console.log('Look for email', email)
-// console.log('Look for pass', password)
-  if (!email || !password) {
-    // console.log(userInfo)
-    res.status(400).send('Missing email or password');
-  }
-for (const key in users) {
-  // console.log(userDatabase[key])
-  if (users[key].email === email && users[key].password === password) {
-    res.cookie("user_id", users[key].id)
-    res.redirect("/urls");
-  }
-}
-};
+// const checkUser = function(users, userInfo, res, req) {
+//   const { email, password } = userInfo;
+//   if (!email || !password) {
+//     res.status(400).send('Missing email or password');
+//   }
+// for (const key in users) {
+//   if (users[key].email === email && bcrypt.compareSync(password, users[key].password)) {
+//     res.cookie("user_id", users[key].id)
+//     res.redirect("/urls");
+//   }
+// }
+// };
