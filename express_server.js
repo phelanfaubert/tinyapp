@@ -24,11 +24,9 @@ app.use(cookieParser())
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-"b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
+// const urlDatabase = {
+//   'b2xVn2': "http://www.lighthouselabs.ca",
+// }
 const urlDatabase = {
 'b2xVn2': {
       longURL: "http://www.lighthouselabs.ca",
@@ -123,6 +121,12 @@ app.get("/register", (req, res) => {
     user: users[req.cookies.user_id]
   }
   res.render("urls_register", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const short = req.params.shortURL;
+  const long = urlDatabase[short].longURL
+  res.redirect(long)
 });
 
 app.post("/register", (req, res) => {
