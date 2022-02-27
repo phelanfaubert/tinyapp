@@ -3,7 +3,8 @@ const app = express();
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
-const { findUserByEmail, generateRandomString } = require('./helpers.js');
+const { findUserByEmail, generateRandomString, urlsForUser } = require('./helpers.js');
+const { users, urlDatabase } = require('./database.js')
 const PORT = 8080;
 
 app.set("view engine", "ejs");
@@ -12,41 +13,6 @@ app.use(cookieSession({
   name: "session",
   keys: ['Iwonderwhatmyfirstbornwillbelike', 'CanIgetcurlyfrieswiththat']
 }));
-
-const users = {
-  "plinketscrooge": {
-    id: "plinketscrooge",
-    email: "plinket@scrooge.com",
-    password: bcrypt.hashSync("1111", 10)
-  },
-  "plunketadmirals": {
-    id: "plunketadmirals",
-    email: "plunket@admirals.com",
-    password: bcrypt.hashSync("2222", 10)
-  }
-};
-
-const urlDatabase = {
-  'b2xVn2': {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "plinketscrooge"
-  },
-  '9sm5xK': {
-    longURL: "https://www.google.com",
-    userID: "plunketadmirals"
-  }
-};
-
-const urlsForUser = function(userId) {
-  const tempObj = {};
-  for (let key in urlDatabase) {
-    const url = urlDatabase[key];
-    if (users[userId].id === url.userID) {
-      tempObj[key] = urlDatabase[key];
-    }
-  }
-  return tempObj;
-};
 
 app.get("/", (req, res) => {
   const templateVars = {
@@ -77,8 +43,6 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
     return;
   }
-
-  // res.render("urls_login", { user: null });
   res.status(400).send('Must be logged in to access this page');
 });
 
