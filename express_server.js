@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 const { findUserByEmail, generateRandomString } = require('./helpers.js');
@@ -24,7 +24,7 @@ const users = {
     email: "plunket@admirals.com",
     password: bcrypt.hashSync("2222", 10)
   }
-}
+};
 
 const urlDatabase = {
   'b2xVn2': {
@@ -55,22 +55,22 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id]) {
-    const urls = urlsForUser(req.session.user_id)
+    const urls = urlsForUser(req.session.user_id);
     const templateVars = {
       user: users[req.session.user_id].email,
       urls: urls
-    }
+    };
     res.render("urls_index", templateVars);
     return;
   }
 
-  res.render("urls_login", { user: null })
+  res.render("urls_login", { user: null });
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id].email
-  }
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -79,17 +79,17 @@ app.get("/urls/:id", (req, res) => {
   if (!userId || !users[userId]) {
     return res.send("<div>Please log in</div>");
   }
-  const urls = urlsForUser(req.session.user_id)
-  const shortURL = req.params.id
+  const urls = urlsForUser(req.session.user_id);
+  const shortURL = req.params.id;
   if (!urls[shortURL]) {
     return res.send("<div>Acces denied</div>");
   }
-  const longURL = urlDatabase[shortURL].longURL
+  const longURL = urlDatabase[shortURL].longURL;
   const templateVars = {
     user: users[req.session.user_id].email,
     shortURL: shortURL,
     longURL: longURL
-  }
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -109,10 +109,10 @@ app.post("/urls", (req, res) => {
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
       userID: userId
-    }
+    };
     res.redirect(`/urls/${shortURL}`);
   } else {
-    res.status(400).send("Acces denied")
+    res.status(400).send("Acces denied");
   }
 });
 
@@ -137,14 +137,14 @@ app.post("/login", (req, res) => {
     return;
   }
   const user = findUserByEmail(email, users);
-   if (!user || !bcrypt.compareSync(password, user.password)) {
-    res.status(400).send('Email/Password Do Not Exist')
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    res.status(400).send('Email/Password Do Not Exist');
     return;
-   }
+  }
 
-   req.session.user_id = user.id;
-   res.redirect("/urls");
-   return;
+  req.session.user_id = user.id;
+  res.redirect("/urls");
+  return;
 });
 
 app.post("/logout", (req, res) => {
@@ -155,14 +155,14 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
-  }
+  };
   res.render("urls_register", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   const short = req.params.id; //b2x  Vn2
-  const long = urlDatabase[short].longURL // lighthouselabs.com
-  res.redirect(long)
+  const long = urlDatabase[short].longURL; // lighthouselabs.com
+  res.redirect(long);
 });
 
 app.post("/register", (req, res) => {
@@ -182,7 +182,7 @@ app.post("/register", (req, res) => {
     id: newID,
     email: req.body.email,
     password: hashedPassword
-  }
+  };
   users[newID] = user;
   req.session.user_id = newID;
   res.redirect("/urls");
@@ -191,20 +191,20 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
-  }
+  };
   if (req.session.user_id) {
     res.redirect("/urls");
   }
-  res.render("urls_login", templateVars)
+  res.render("urls_login", templateVars);
 });
 
-const urlsForUser = function (userId) {
-  const tempObj = {}
+const urlsForUser = function(userId) {
+  const tempObj = {};
   for (let key in urlDatabase) {
     const url = urlDatabase[key];
     if (users[userId].id === url.userID) {
-      tempObj[key] = urlDatabase[key]
+      tempObj[key] = urlDatabase[key];
     }
   }
   return tempObj;
-}
+};
