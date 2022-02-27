@@ -37,6 +37,17 @@ const urlDatabase = {
   }
 };
 
+const urlsForUser = function(userId) {
+  const tempObj = {};
+  for (let key in urlDatabase) {
+    const url = urlDatabase[key];
+    if (users[userId].id === url.userID) {
+      tempObj[key] = urlDatabase[key];
+    }
+  }
+  return tempObj;
+};
+
 app.get("/", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
@@ -46,10 +57,6 @@ app.get("/", (req, res) => {
   }
   res.render("urls_login", templateVars);
   // res.send("Hello!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -113,6 +120,32 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user: users[req.session.user_id]
+  };
+  if (req.session.user_id) {
+    res.redirect("/urls")
+  }
+  res.render("urls_register", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  const short = req.params.id; //b2x  Vn2
+  const long = urlDatabase[short].longURL; // lighthouselabs.com
+  res.redirect(long);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.session.user_id]
+  };
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  }
+  res.render("urls_login", templateVars);
+});
+
 app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
   if (userId && users[userId]) {
@@ -163,22 +196,6 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/register", (req, res) => {
-  const templateVars = {
-    user: users[req.session.user_id]
-  };
-  if (req.session.user_id) {
-    res.redirect("/urls")
-  }
-  res.render("urls_register", templateVars);
-});
-
-app.get("/u/:id", (req, res) => {
-  const short = req.params.id; //b2x  Vn2
-  const long = urlDatabase[short].longURL; // lighthouselabs.com
-  res.redirect(long);
-});
-
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -202,23 +219,6 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.session.user_id]
-  };
-  if (req.session.user_id) {
-    res.redirect("/urls");
-  }
-  res.render("urls_login", templateVars);
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
-
-const urlsForUser = function(userId) {
-  const tempObj = {};
-  for (let key in urlDatabase) {
-    const url = urlDatabase[key];
-    if (users[userId].id === url.userID) {
-      tempObj[key] = urlDatabase[key];
-    }
-  }
-  return tempObj;
-};
