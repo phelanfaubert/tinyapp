@@ -65,7 +65,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-
   if (users[req.session.user_id]) {
     const urls = urlsForUser(req.session.user_id)
     const templateVars = {
@@ -128,9 +127,9 @@ app.post("/urls", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL].longURL;
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.id;
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
@@ -145,23 +144,22 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
   if (!email || !password) {
-    res.status(400).send('Missing email or password');
+    res.status(400).send('Missing Email Or Password');
     return;
   }
-  let id = findUserByEmail(email, users);
-  for (const user in users) {
-    if (bcrypt.compareSync(password, users[user]["password"])) {
-      id = users[user]["id"]
-      req.session.user_id = id;
-      res.redirect("/urls");
-      return;
-    }
-  }
+  const user = findUserByEmail(email, users);
+   if (!user || !bcrypt.compareSync(password, user.password)) {
+    res.status(400).send('Email/Password Do Not Exist')
+    return;
+   }
+
+   req.session.user_id = user.id;
+   res.redirect("/urls");
+   return;
 });
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.status(400).send('You are not logged in');
   res.redirect("/urls");
 });
 
@@ -172,8 +170,8 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const short = req.params.shortURL; //b2xVn2
+app.get("/u/:id", (req, res) => {
+  const short = req.params.id; //b2x  Vn2
   const long = urlDatabase[short].longURL // lighthouselabs.com
   res.redirect(long)
 });
@@ -182,10 +180,11 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
-    res.status(400).send('User does not exist');
+    return res.status(400).send('Cannot Leave Fields Blank');
   }
-  if (findUserByEmail(email)) {
-    res.status(400).send('Invalid');
+
+  if (findUserByEmail(email, users)) {
+    return res.status(400).send('Email Already Exists');
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -196,7 +195,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   }
   users[newID] = user;
-  res.cookie("user_id", newID);
+  req.session.user_id = newID;
   res.redirect("/urls");
 });
 
