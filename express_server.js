@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: "session",
-  keys: ['Iwonderwhatmyfirstbornwillbelike', 'Everythinghurtsalldayeveryday']
+  keys: ['Iwonderwhatmyfirstbornwillbelike', 'CanIgetcurlyfrieswiththat']
 }));
 
 const users = {
@@ -36,17 +36,6 @@ const urlDatabase = {
     userID: "plunketadmirals"
   }
 };
-
-const urlsForUser = function (userId) {
-  const tempObj = {}
-  for (let key in urlDatabase) {
-    const url = urlDatabase[key];
-    if (users[userId].id === url.userID) {
-      tempObj[key] = urlDatabase[key]
-    }
-  }
-  return tempObj;
-}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -209,3 +198,13 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars)
 });
 
+const urlsForUser = function (userId) {
+  const tempObj = {}
+  for (let key in urlDatabase) {
+    const url = urlDatabase[key];
+    if (users[userId].id === url.userID) {
+      tempObj[key] = urlDatabase[key]
+    }
+  }
+  return tempObj;
+}

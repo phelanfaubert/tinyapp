@@ -1,5 +1,4 @@
 function generateRandomString() {
-
   const result = Math.random().toString(20).substring(2, 8);
   return result;
 };
