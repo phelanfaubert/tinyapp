@@ -38,7 +38,14 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const templateVars = {
+    user: users[req.session.user_id]
+  };
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  }
+  res.render("urls_login", templateVars);
+  // res.send("Hello!");
 });
 
 app.listen(PORT, () => {
@@ -64,13 +71,17 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-  res.render("urls_login", { user: null });
+  // res.render("urls_login", { user: null });
+  res.status(400).send('Must be logged in to access this page');
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id].email
+    user: users[req.session.user_id]
   };
+  if (req.session.user_id) {
+    res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -156,6 +167,9 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
   };
+  if (req.session.user_id) {
+    res.redirect("/urls")
+  }
   res.render("urls_register", templateVars);
 });
 
